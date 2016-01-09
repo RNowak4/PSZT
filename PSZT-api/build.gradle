@@ -8,8 +8,5 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
     compile 'com.googlecode.fannj:fannj:0.6'
-    compile project(':PSZT-api')
-    compile project(':PSZT-core')
 }

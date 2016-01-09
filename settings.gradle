@@ -1,2 +1,5 @@
 rootProject.name = 'PSZT'
+include 'PSZT-api'
+include 'PSZT-core'
+include 'PSZT-test'
 
