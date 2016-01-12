@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+                  <MenuItem fx:id="menuReset" mnemonicParsing="false" text="Reset" />
+              <MenuItem fx:id="menuClose" mnemonicParsing="false" text="Close" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <center>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <SplitPane dividerPositions="0.4" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <items>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                           <children>
+                              <VBox fx:id="progressBar" prefHeight="200.0" prefWidth="100.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <Label text="Learning:">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Label>
+                                    <Label text="Choose directory with XML files." />
+                                    <HBox spacing="10.0">
+                                       <children>
+                                          <TextField fx:id="directoryTF" HBox.hgrow="ALWAYS" />
+                                          <Button fx:id="directoryButton" mnemonicParsing="false" text="  ...  " />
+                                       </children>
+                                    </HBox>
+                                    <Button fx:id="processButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="220.0" text="Process">
+                                       <VBox.margin>
+                                          <Insets left="80.0" right="80.0" />
+                                       </VBox.margin>
+                                    </Button>
+                              <Label fx:id="infoLabel">
+                                 <VBox.margin>
+                                    <Insets left="80.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </VBox>
+                           </children>
+                        </AnchorPane>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                          <children>
+                          <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <children>
+                                  <Label text="Message to categorize:">
+                                      <font>
+                                          <Font size="15.0" />
+                                      </font>
+                                  </Label>
+                                  <TextArea fx:id="messageTextArea" prefHeight="520.0" prefWidth="386.0" />
+                                  <Button fx:id="categorizeButton" alignment="TOP_CENTER" mnemonicParsing="false" prefHeight="25.0" prefWidth="392.0" text="Categorize" />
+                                  <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+                                      <children>
+                                          <Label text="Matching category: ">
+                                              <font>
+                                                  <Font size="15.0" />
+                                              </font>
+                                          </Label>
+                                          <TextField fx:id="resultTextField" HBox.hgrow="ALWAYS">
+                                              <font>
+                                                  <Font size="14.0" />
+                                              </font>
+                                          </TextField>
+                                      </children>
+                                  </HBox>
+                              </children>
+                              <opaqueInsets>
+                                  <Insets />
+                              </opaqueInsets>
+                              <padding>
+                                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                              </padding>
+                          </VBox>
+                          </children>
+                      </AnchorPane>
+                    </items>
+                  </SplitPane>
+               </children>
+            </AnchorPane>
+   </center>
+</BorderPane>
