@@ -1,3 +1,7 @@
+import backend.Training;
+import backend.TrainingImpl;
+import com.googlecode.fannj.TrainingAlgorithm;
+
 import com.googlecode.fannj.Fann;
 import com.googlecode.fannj.Layer;
 import com.sun.org.apache.xpath.internal.SourceTree;
@@ -18,6 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import backend.Training;
+import backend.TrainingImpl;
+import com.googlecode.fannj.TrainingAlgorithm;
 
 public class Main extends Application {
     private Stage primaryStage;
@@ -44,13 +51,7 @@ public class Main extends Application {
     private MenuItem menuClose;
 
     public static void main(String[] args) {
-        System.setProperty("jna.library.path", "./lib/");
-
-        List<Layer> layers = new ArrayList<>();
-        layers.add(Layer.create(3000));
-        layers.add(Layer.create(300));
-        layers.add(Layer.create(30));
-        layers.add(Layer.create(3));
+        System.setProperty("jna.library.path", "/usr/local/lib/");
 
         Fann fann = new Fann(layers);
         System.out.println(fann.getNumInputNeurons());

@@ -1,4 +1,4 @@
-package controller;
+package backend;
 
 import com.googlecode.fannj.ActivationFunction;
 import com.googlecode.fannj.TrainingAlgorithm;
