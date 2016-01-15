@@ -1,20 +1,25 @@
 package backend;
 
-import com.googlecode.fannj.Fann;
-import com.googlecode.fannj.TrainingAlgorithm;
+import org.encog.neural.networks.BasicNetwork;
 
-import java.io.File;
-import java.util.Optional;
 import java.util.Set;
 
+//TODO
+// wybieranie algorytmow
 public interface Training {
-    Optional<Fann> trainStemmedDirectory();
+    /**
+     * @return true, if OK
+     */
+    boolean trainStemmedDirectory(final String directoryName);
 
-    Optional<Fann> getFann();
+    BasicNetwork getNetwork();
 
+    /**
+     * @return all known words
+     */
     Set<String> getTrainedWords();
 
     Set<String> getCategories();
 
-    void addCategory(String categoryName);
+    void addCategory(final String categoryName);
 }

@@ -7,5 +7,4 @@ build/
 .gradle/
 gradle/
 
-output.txt
 test/

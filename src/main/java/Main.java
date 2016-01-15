@@ -51,12 +51,10 @@ public class Main extends Application {
     private MenuItem menuClose;
 
     public static void main(String[] args) {
-        System.setProperty("jna.library.path", "/usr/local/lib/");
-
-        Fann fann = new Fann(layers);
-        System.out.println(fann.getNumInputNeurons());
-        System.out.println(fann.getNumOutputNeurons());
-        System.out.println(fann.getTotalNumNeurons());
+        Training training = new TrainingImpl(0.1d, 5000);
+        training.addCategory("polityka");
+        training.addCategory("ekonomia");
+        training.trainStemmedDirectory("test/");
 
         launch(args);
     }
