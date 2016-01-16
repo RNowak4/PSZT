@@ -13,6 +13,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.encog.engine.network.activation.ActivationSigmoid;
+import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import java.io.File;
 import java.io.IOException;

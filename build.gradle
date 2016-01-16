@@ -2,6 +2,7 @@ group 'PSZT'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply from: 'javafx.plugin'
 
 repositories {
     mavenCentral()
