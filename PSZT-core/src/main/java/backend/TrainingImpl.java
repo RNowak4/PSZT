@@ -1,11 +1,12 @@
 package backend;
 
-import org.encog.engine.network.activation.ActivationSigmoid;
+import org.encog.engine.network.activation.*;
 import org.encog.neural.data.NeuralDataSet;
 import org.encog.neural.data.basic.BasicNeuralDataSet;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.Train;
+import org.encog.neural.networks.training.propagation.quick.QuickPropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import java.io.File;
@@ -22,14 +23,20 @@ public class TrainingImpl implements Training {
     private double desiredError;
     private int maxEpochs;
     private BasicNetwork network;
+    private Class<? extends ActivationFunction> activationFunctionType;
+    private Class<? extends Train> trainingMethodType;
     private double[][] inputTable;
     private double[][] idealOutputTable;
     private Map<String, Integer> categories = new HashMap<>();
     private Set<String> trainedWords = new TreeSet<>(); // sorted
 
-    public TrainingImpl(final double desiredError, final int maxEpochs) {
+    public TrainingImpl(final double desiredError, final int maxEpochs,
+                        final Class<? extends ActivationFunction> activationFunctionType,
+                        final Class<? extends Train> trainingMethodType) {
         this.desiredError = desiredError;
         this.maxEpochs = maxEpochs;
+        this.activationFunctionType = activationFunctionType;
+        this.trainingMethodType = trainingMethodType;
         this.network = new BasicNetwork();
     }
 
@@ -43,7 +50,8 @@ public class TrainingImpl implements Training {
         trainedWords.removeAll(categories.keySet());
     }
 
-    private void flushTrainingData(List<double[]> inputList, List<double[]> idealOutputList, final Map<String, Integer> wordsMap, final int categoryPos) {
+    private void flushTrainingData(final List<double[]> inputList, final List<double[]> idealOutputList,
+                                   final Map<String, Integer> wordsMap, final int categoryPos) {
         boolean wrongArguments = wordsMap.isEmpty() || categoryPos < 0;
         if (wrongArguments)
             return;
@@ -71,7 +79,9 @@ public class TrainingImpl implements Training {
         wordsMap.clear();
     }
 
-    private void learnFromFile(final Path filePath, List<double[]> inputList, List<double[]> idealOutputList) throws IOException {
+    private void learnFromFile(final Path filePath,
+                               final List<double[]> inputList,
+                               final List<double[]> idealOutputList) throws IOException {
         final Map<String, Integer> wordsMap = new HashMap<>();
 
         int lastCategoryPos = -1;
@@ -138,16 +148,16 @@ public class TrainingImpl implements Training {
         int inputSize = this.trainedWords.size();
         int outputSize = this.categories.size();
 
-        network.addLayer(new BasicLayer(new ActivationSigmoid(), true, inputSize));
-        network.addLayer(new BasicLayer(new ActivationSigmoid(), true, 2 * inputSize));
-        network.addLayer(new BasicLayer(new ActivationSigmoid(), true, outputSize));
+        network.addLayer(new BasicLayer(getActivationFunction(), true, inputSize));
+        network.addLayer(new BasicLayer(getActivationFunction(), true, 2 * inputSize));
+        network.addLayer(new BasicLayer(getActivationFunction(), true, outputSize));
         network.getStructure().finalizeStructure();
         network.reset();
     }
 
     private void learnNetwork() {
         final NeuralDataSet trainingSet = new BasicNeuralDataSet(inputTable, idealOutputTable);
-        final Train train = new ResilientPropagation(network, trainingSet);
+        final Train train = getTraining(network, trainingSet);
 
         int epoch = 0;
         do {
@@ -156,6 +166,32 @@ public class TrainingImpl implements Training {
             ++epoch;
         } while (epoch <= maxEpochs && train.getError() > desiredError);
 
+    }
+
+    private ActivationFunction getActivationFunction() {
+        if (this.activationFunctionType.equals(ActivationBiPolar.class))
+            return new ActivationBiPolar();
+        else if (this.activationFunctionType.equals(ActivationGaussian.class))
+            return new ActivationGaussian();
+        else if (this.activationFunctionType.equals(ActivationLinear.class))
+            return new ActivationLinear();
+        else if (this.activationFunctionType.equals(ActivationLOG.class))
+            return new ActivationLOG();
+        else if (this.activationFunctionType.equals(ActivationSigmoid.class))
+            return new ActivationSigmoid();
+        else if (this.activationFunctionType.equals(ActivationSIN.class))
+            return new ActivationSIN();
+        else
+            throw new UnsupportedOperationException("Unsupported ActivationFunction type!");
+    }
+
+    private Train getTraining(final BasicNetwork network, final NeuralDataSet trainingSet) {
+        if (this.trainingMethodType.equals(ResilientPropagation.class))
+            return new ResilientPropagation(network, trainingSet);
+        else if (this.trainingMethodType.equals(QuickPropagation.class))
+            return new QuickPropagation(network, trainingSet);
+        else
+            throw new UnsupportedOperationException("Unsupported Training method type!");
     }
 
     @Override

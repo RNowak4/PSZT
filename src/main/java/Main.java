@@ -1,10 +1,6 @@
 import backend.Training;
 import backend.TrainingImpl;
-import com.googlecode.fannj.TrainingAlgorithm;
 
-import com.googlecode.fannj.Fann;
-import com.googlecode.fannj.Layer;
-import com.sun.org.apache.xpath.internal.SourceTree;
 import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -20,11 +16,6 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import backend.Training;
-import backend.TrainingImpl;
-import com.googlecode.fannj.TrainingAlgorithm;
 
 public class Main extends Application {
     private Stage primaryStage;
@@ -51,7 +42,7 @@ public class Main extends Application {
     private MenuItem menuClose;
 
     public static void main(String[] args) {
-        Training training = new TrainingImpl(0.1d, 5000);
+        Training training = new TrainingImpl(0.1d, 5000, ActivationSigmoid.class, ResilientPropagation.class);
         training.addCategory("polityka");
         training.addCategory("ekonomia");
         training.trainStemmedDirectory("test/");

@@ -4,8 +4,6 @@ import org.encog.neural.networks.BasicNetwork;
 
 import java.util.Set;
 
-//TODO
-// wybieranie algorytmow
 public interface Training {
     /**
      * @return true, if OK
