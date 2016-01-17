@@ -44,7 +44,7 @@ public class Main extends Application {
     private MenuItem menuClose;
 
     public static void main(String[] args) {
-        Training training = new TrainingImpl(0.1d, 5000, ActivationSigmoid.class, ResilientPropagation.class);
+        Training training = new TrainingImpl(0.1d, 5000, ResilientPropagation.class);
         training.addCategory("polityka");
         training.addCategory("ekonomia");
         training.trainStemmedDirectory("test/");
