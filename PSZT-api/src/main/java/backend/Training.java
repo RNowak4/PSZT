@@ -18,6 +18,4 @@ public interface Training {
     Set<String> getTrainedWords();
 
     Set<String> getCategories();
-
-    void addCategory(final String categoryName);
 }

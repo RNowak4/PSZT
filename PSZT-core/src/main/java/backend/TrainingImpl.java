@@ -36,6 +36,24 @@ public class TrainingImpl implements Training {
         this.maxEpochs = maxEpochs;
         this.trainingMethodType = trainingMethodType;
         this.network = new BasicNetwork();
+
+        loadCategories();
+    }
+
+    private void loadCategories() {
+        ClassLoader cl = this.getClass().getClassLoader();
+        File categoriesFile = new File(cl.getResource("categories.txt").getFile());
+
+        try (Scanner scanner = new Scanner(categoriesFile)) {
+
+            while (scanner.hasNextLine()) {
+                String category = scanner.nextLine();
+                addCategory(category);
+            }
+            scanner.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createWordsMap(final File trainingDirectory) throws IOException {
@@ -161,7 +179,7 @@ public class TrainingImpl implements Training {
             train.iteration();
             System.out.println("Epoch #" + epoch + " Error:" + train.getError());
             ++epoch;
-        } while (epoch <= maxEpochs && train.getError() > desiredError);
+        } while (epoch < maxEpochs && train.getError() > desiredError);
 
     }
 
@@ -184,8 +202,7 @@ public class TrainingImpl implements Training {
         return categories.keySet();
     }
 
-    @Override
-    public void addCategory(final String categoryName) {
+    private void addCategory(final String categoryName) {
         categories.putIfAbsent(categoryName, categories.size());
     }
 }
