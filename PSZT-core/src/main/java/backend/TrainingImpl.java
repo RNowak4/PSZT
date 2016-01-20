@@ -10,11 +10,10 @@ import org.encog.neural.networks.training.Train;
 import org.encog.neural.networks.training.propagation.quick.QuickPropagation;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,7 +27,7 @@ public class TrainingImpl implements Training {
     private double[][] inputTable;
     private double[][] idealOutputTable;
     private Map<String, Integer> categories = new HashMap<>();
-    private Set<String> trainedWords = new TreeSet<>(); // sorted
+    private Set<String> trainedWords = new HashSet<>();
 
     public TrainingImpl(final double desiredError, final int maxEpochs,
                         final Class<? extends Train> trainingMethodType) {
@@ -37,10 +36,10 @@ public class TrainingImpl implements Training {
         this.trainingMethodType = trainingMethodType;
         this.network = new BasicNetwork();
 
-        loadCategories();
+        loadDefaultCategories();
     }
 
-    private void loadCategories() {
+    private void loadDefaultCategories() {
         ClassLoader cl = this.getClass().getClassLoader();
         File categoriesFile = new File(cl.getResource("categories.txt").getFile());
 
@@ -58,12 +57,18 @@ public class TrainingImpl implements Training {
 
     private void createWordsMap(final File trainingDirectory) throws IOException {
         for (final File file : trainingDirectory.listFiles()) {
-            Path path = FileSystems.getDefault().getPath(trainingDirectory.getName(), file.getName());
-            for (String line : Files.readAllLines(path)) {
+            createFileWordsMap(file);
+        }
+        trainedWords.removeAll(categories.keySet());
+    }
+
+    private void createFileWordsMap(final File file) throws IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
                 trainedWords.addAll(Stream.of(line.split("\\s+")).collect(Collectors.toSet()));
             }
         }
-        trainedWords.removeAll(categories.keySet());
     }
 
     private void flushTrainingData(final List<double[]> inputList, final List<double[]> idealOutputList,
@@ -95,36 +100,41 @@ public class TrainingImpl implements Training {
         wordsMap.clear();
     }
 
-    private void learnFromFile(final Path filePath,
+    private void learnFromFile(final File file,
                                final List<double[]> inputList,
                                final List<double[]> idealOutputList) throws IOException {
         final Map<String, Integer> wordsMap = new HashMap<>();
 
         int lastCategoryPos = -1;
-        for (final String line : Files.readAllLines(filePath)) {
-            for (final String word : line.split("\\s+")) {
-                if (categories.containsKey(word)) {
-                    flushTrainingData(inputList, idealOutputList, wordsMap, lastCategoryPos);
-                    lastCategoryPos = categories.get(word);
-                } else {
-                    if (wordsMap.containsKey(word))
-                        wordsMap.replace(word, wordsMap.get(word) + 1);
-                    else
-                        wordsMap.put(word, 1);
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                for (final String word : line.split("\\s+")) {
+                    if (categories.containsKey(word)) {
+                        flushTrainingData(inputList, idealOutputList, wordsMap, lastCategoryPos);
+                        lastCategoryPos = categories.get(word);
+                    } else {
+                        if (wordsMap.containsKey(word))
+                            wordsMap.replace(word, wordsMap.get(word) + 1);
+                        else
+                            wordsMap.put(word, 1);
+                    }
                 }
             }
         }
         flushTrainingData(inputList, idealOutputList, wordsMap, lastCategoryPos);
     }
 
-    private void createLearningData(final File trainingDirectory) throws IOException {
+    private void createLearningData(final File file) throws IOException {
         final List<double[]> inputList = new ArrayList<>();
         final List<double[]> idealOutputList = new ArrayList<>();
 
-        for (final File file : trainingDirectory.listFiles()) {
-            Path filePath = FileSystems.getDefault().getPath(file.getParent(), file.getName());
-            learnFromFile(filePath, inputList, idealOutputList);
-        }
+        if (file.isDirectory()) {
+            for (final File subFile : file.listFiles()) {
+                learnFromFile(subFile, inputList, idealOutputList);
+            }
+        } else
+            learnFromFile(file, inputList, idealOutputList);
 
         int inputListSize = inputList.size();
         int outputListSize = idealOutputList.size();
@@ -139,6 +149,7 @@ public class TrainingImpl implements Training {
     @Override
     public boolean trainStemmedDirectory(final String directoryName) {
         final File trainingDirectory = new File(directoryName);
+
         if (!trainingDirectory.isDirectory()) {
             return false;
         }
@@ -152,6 +163,24 @@ public class TrainingImpl implements Training {
 
         prepareNetwork();
         learnNetwork();
+
+        return true;
+    }
+
+    @Override
+    public boolean trainStemmedFile(final String fileName) {
+        final File file = new File(fileName);
+
+        try {
+            createFileWordsMap(file);
+            createLearningData(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        prepareNetwork();
+        learnNetwork();
+
         return true;
     }
 
@@ -202,7 +231,7 @@ public class TrainingImpl implements Training {
         return categories.keySet();
     }
 
-    private void addCategory(final String categoryName) {
+    public void addCategory(final String categoryName) {
         categories.putIfAbsent(categoryName, categories.size());
     }
 }
