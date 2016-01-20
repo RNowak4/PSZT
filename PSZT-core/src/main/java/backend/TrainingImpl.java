@@ -113,8 +113,8 @@ public class TrainingImpl implements Training {
         int trainedWordsNumber = trainedWords.size();
         int outputsNumber = categories.size();
 
+        int i = 0;
         for (List<Map<String, Integer>> maps : learnedData) {
-            int i = 0;
             for (Map<String, Integer> dataSet : maps) {
                 inputTable[i] = new double[trainedWordsNumber];
                 idealOutputTable[i] = new double[outputsNumber];
