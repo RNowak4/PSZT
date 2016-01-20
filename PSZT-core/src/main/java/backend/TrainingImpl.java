@@ -15,11 +15,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SuppressWarnings("ConstantConditions")
 public class TrainingImpl implements Training {
+    private final String DEFAULT_CATEGORIES_FILE_NAME = "categories.txt";
     private double desiredError;
     private int maxEpochs;
     private BasicNetwork network;
@@ -27,7 +26,7 @@ public class TrainingImpl implements Training {
     private double[][] inputTable;
     private double[][] idealOutputTable;
     private Map<String, Integer> categories = new HashMap<>();
-    private Set<String> trainedWords = new HashSet<>();
+    private Set<String> trainedWords = new TreeSet<>();
 
     public TrainingImpl(final double desiredError, final int maxEpochs,
                         final Class<? extends Train> trainingMethodType) {
@@ -41,7 +40,7 @@ public class TrainingImpl implements Training {
 
     private void loadDefaultCategories() {
         ClassLoader cl = this.getClass().getClassLoader();
-        File categoriesFile = new File(cl.getResource("categories.txt").getFile());
+        File categoriesFile = new File(cl.getResource(DEFAULT_CATEGORIES_FILE_NAME).getFile());
 
         try (Scanner scanner = new Scanner(categoriesFile)) {
 
@@ -55,64 +54,18 @@ public class TrainingImpl implements Training {
         }
     }
 
-    private void createWordsMap(final File trainingDirectory) throws IOException {
-        for (final File file : trainingDirectory.listFiles()) {
-            createFileWordsMap(file);
-        }
-        trainedWords.removeAll(categories.keySet());
-    }
+    // returns list containing counter words for each category
+    private List<Map<String, Integer>> learnFromFile(final File file) throws IOException {
+        List<Map<String, Integer>> retList = new ArrayList<>();
+        Map<String, Integer> wordsMap = new HashMap<>();
 
-    private void createFileWordsMap(final File file) throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                trainedWords.addAll(Stream.of(line.split("\\s+")).collect(Collectors.toSet()));
-            }
-        }
-    }
-
-    private void flushTrainingData(final List<double[]> inputList, final List<double[]> idealOutputList,
-                                   final Map<String, Integer> wordsMap, final int categoryPos) {
-        boolean wrongArguments = wordsMap.isEmpty() || categoryPos < 0;
-        if (wrongArguments)
-            return;
-
-        // filling input table
-        int inputSize = trainedWords.size();
-        final double[] inputToAdd = new double[inputSize];
-        inputList.add(inputToAdd);
-
-        int i = 0;
-        for (String trainingWord : trainedWords) {
-            if (wordsMap.containsKey(trainingWord))
-                inputToAdd[i] = (wordsMap.get(trainingWord));
-            else
-                inputToAdd[i] = 0d;
-            ++i;
-        }
-
-        // filling ideal output table
-        int outputSize = categories.size();
-        final double[] idealOutput = new double[outputSize];
-        idealOutputList.add(idealOutput);
-        idealOutput[categoryPos] = 1d;
-
-        wordsMap.clear();
-    }
-
-    private void learnFromFile(final File file,
-                               final List<double[]> inputList,
-                               final List<double[]> idealOutputList) throws IOException {
-        final Map<String, Integer> wordsMap = new HashMap<>();
-
-        int lastCategoryPos = -1;
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 for (final String word : line.split("\\s+")) {
                     if (categories.containsKey(word)) {
-                        flushTrainingData(inputList, idealOutputList, wordsMap, lastCategoryPos);
-                        lastCategoryPos = categories.get(word);
+                        retList.add(wordsMap);
+                        wordsMap = new HashMap<>();
                     } else {
                         if (wordsMap.containsKey(word))
                             wordsMap.replace(word, wordsMap.get(word) + 1);
@@ -122,28 +75,62 @@ public class TrainingImpl implements Training {
                 }
             }
         }
-        flushTrainingData(inputList, idealOutputList, wordsMap, lastCategoryPos);
+
+        retList.add(wordsMap);
+
+        return retList;
     }
 
     private void createLearningData(final File file) throws IOException {
-        final List<double[]> inputList = new ArrayList<>();
-        final List<double[]> idealOutputList = new ArrayList<>();
+        // list of analyzed data for each file.
+        // For each file we have list of all analyzed categories statistics in map.
+        final List<List<Map<String, Integer>>> learnedData = new ArrayList<>();
 
         if (file.isDirectory()) {
             for (final File subFile : file.listFiles()) {
-                learnFromFile(subFile, inputList, idealOutputList);
+                learnedData.add(learnFromFile(subFile));
             }
         } else
-            learnFromFile(file, inputList, idealOutputList);
+            learnedData.add(learnFromFile(file));
 
-        int inputListSize = inputList.size();
-        int outputListSize = idealOutputList.size();
+        flushData(learnedData);
+    }
 
-        inputTable = new double[inputListSize][];
-        idealOutputTable = new double[outputListSize][];
+    private void flushData(final List<List<Map<String, Integer>>> learnedData) {
+        // create list of learned words
+        int analyzedCategories = 0;
+        for (List<Map<String, Integer>> maps : learnedData) {
+            for (Map<String, Integer> dataSet : maps) {
+                trainedWords.addAll(dataSet.keySet());
+            }
 
-        inputList.toArray(inputTable);
-        idealOutputList.toArray(idealOutputTable);
+            analyzedCategories += maps.size();
+        }
+
+        inputTable = new double[analyzedCategories][];
+        idealOutputTable = new double[analyzedCategories][];
+
+        int trainedWordsNumber = trainedWords.size();
+        int outputsNumber = categories.size();
+
+        for (List<Map<String, Integer>> maps : learnedData) {
+            int i = 0;
+            for (Map<String, Integer> dataSet : maps) {
+                inputTable[i] = new double[trainedWordsNumber];
+                idealOutputTable[i] = new double[outputsNumber];
+
+                int j = 0;
+                for (String trainedWord : trainedWords) {
+                    Integer mapValue = dataSet.get(trainedWord);
+                    if (mapValue == null)
+                        inputTable[i][j] = 0d;
+                    else
+                        inputTable[i][j] = mapValue;
+                    ++j;
+                }
+                ++i;
+            }
+        }
     }
 
     @Override
@@ -155,7 +142,6 @@ public class TrainingImpl implements Training {
         }
 
         try {
-            createWordsMap(trainingDirectory);
             createLearningData(trainingDirectory);
         } catch (IOException e) {
             e.printStackTrace();
@@ -172,7 +158,6 @@ public class TrainingImpl implements Training {
         final File file = new File(fileName);
 
         try {
-            createFileWordsMap(file);
             createLearningData(file);
         } catch (IOException e) {
             e.printStackTrace();
