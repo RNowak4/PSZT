@@ -1,5 +1,5 @@
-import backend.Training;
-import backend.TrainingImpl;
+import backend.TextAnalyzer;
+import backend.TextAnalyzerImpl;
 
 import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
@@ -13,7 +13,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
 import java.io.File;
@@ -44,8 +43,9 @@ public class Main extends Application {
     private MenuItem menuClose;
 
     public static void main(String[] args) {
-        Training training = new TrainingImpl(0.1d, 50, ResilientPropagation.class);
-        training.trainStemmedDirectory("test/");
+       TextAnalyzer textLearner = new TextAnalyzerImpl(0.1d, 50, ResilientPropagation.class);
+        textLearner.loadCategoriesFromFile("test/categories.txt");
+        textLearner.trainStemmedFile("test/nauka.txt");
 
         launch(args);
     }

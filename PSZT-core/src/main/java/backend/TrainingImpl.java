@@ -18,7 +18,7 @@ import java.util.*;
 
 @SuppressWarnings("ConstantConditions")
 public class TrainingImpl implements Training {
-    private final String DEFAULT_CATEGORIES_FILE_NAME = "categories.txt";
+    private final String DEFAULT_CATEGORIES_FILE_NAME = "test/categories.txt";
     private double desiredError;
     private int maxEpochs;
     private BasicNetwork network;
@@ -29,29 +29,12 @@ public class TrainingImpl implements Training {
     private Set<String> trainedWords = new TreeSet<>();
 
     public TrainingImpl(final double desiredError, final int maxEpochs,
+                        final BasicNetwork network,
                         final Class<? extends Train> trainingMethodType) {
         this.desiredError = desiredError;
         this.maxEpochs = maxEpochs;
         this.trainingMethodType = trainingMethodType;
-        this.network = new BasicNetwork();
-
-        loadDefaultCategories();
-    }
-
-    private void loadDefaultCategories() {
-        ClassLoader cl = this.getClass().getClassLoader();
-        File categoriesFile = new File(cl.getResource(DEFAULT_CATEGORIES_FILE_NAME).getFile());
-
-        try (Scanner scanner = new Scanner(categoriesFile)) {
-
-            while (scanner.hasNextLine()) {
-                String category = scanner.nextLine();
-                addCategory(category);
-            }
-            scanner.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.network = network;
     }
 
     // returns list containing counter words for each category
@@ -212,11 +195,7 @@ public class TrainingImpl implements Training {
     }
 
     @Override
-    public Set<String> getCategories() {
-        return categories.keySet();
-    }
-
-    public void addCategory(final String categoryName) {
-        categories.putIfAbsent(categoryName, categories.size());
+    public void setCategories(final Map<String, Integer> categories) {
+        this.categories = categories;
     }
 }

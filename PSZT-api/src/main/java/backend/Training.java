@@ -2,7 +2,7 @@ package backend;
 
 import org.encog.neural.networks.BasicNetwork;
 
-import java.io.File;
+import java.util.Map;
 import java.util.Set;
 
 public interface Training {
@@ -13,12 +13,12 @@ public interface Training {
 
     boolean trainStemmedFile(final String fileName);
 
+    void setCategories(Map<String, Integer> categories);
+
     BasicNetwork getNetwork();
 
     /**
      * @return all known words
      */
     Set<String> getTrainedWords();
-
-    Set<String> getCategories();
 }
