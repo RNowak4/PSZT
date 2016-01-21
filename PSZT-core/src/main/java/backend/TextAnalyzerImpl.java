@@ -108,6 +108,7 @@ public class TextAnalyzerImpl implements TextAnalyzer {
     }
 
     private void addCategory(final String categoryName) {
-        categories.putIfAbsent(categoryName, categories.size());
+        int size = categories.size();
+        categories.putIfAbsent(categoryName, size);
     }
 }
