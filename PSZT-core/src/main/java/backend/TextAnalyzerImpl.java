@@ -84,6 +84,21 @@ public class TextAnalyzerImpl implements TextAnalyzer {
     }
 
     @Override
+    public void setMaxEpochs(final int maxEpochs) {
+        training.setMaxEpochs(maxEpochs);
+    }
+
+    @Override
+    public void setDesiredError(final double desiredError) {
+        training.setDesiredError(desiredError);
+    }
+
+    @Override
+    public void setTrainingMethodType(Class<? extends Train> trainingMethodType) {
+        training.setTrainingMethodType(trainingMethodType);
+    }
+
+    @Override
     public Set<String> getTrainedWords() {
         return training.getTrainedWords();
     }
