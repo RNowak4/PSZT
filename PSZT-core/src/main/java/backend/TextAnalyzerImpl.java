@@ -98,6 +98,11 @@ public class TextAnalyzerImpl implements TextAnalyzer {
     }
 
     @Override
+    public Set<String> getStopWords() {
+        return training.getStopWords();
+    }
+
+    @Override
     public Set<String> getTrainedWords() {
         return training.getTrainedWords();
     }

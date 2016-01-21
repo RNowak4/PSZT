@@ -24,6 +24,8 @@ public interface Training {
 
     void setTrainingMethodType(Class<? extends Train> trainingMethodType);
 
+    Set<String> getStopWords();
+
     /**
      * @return all known words
      */

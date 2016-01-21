@@ -70,13 +70,13 @@ public class TrainingImpl implements Training {
                         continue;
 
                     final String stemmedWord = stemmer.stem(word).toString();
-                    final Integer categoryPos = categories.get(stemmedWord);
+                    final Integer categoryPos = categories.get(word);
                     if (categoryPos != null) {
                         if (dataSet != null)
                             retList.add(dataSet);
                         dataSet = new DataSet(categoryPos);
                     } else {
-                        dataSet.addWord(word);
+                        dataSet.addWord(stemmedWord);
                     }
                 }
             }
@@ -85,6 +85,11 @@ public class TrainingImpl implements Training {
         retList.add(dataSet);
 
         return retList;
+    }
+
+    @Override
+    public Set<String> getStopWords() {
+        return stopWords;
     }
 
     private void createLearningData(final File file) throws IOException {

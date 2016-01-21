@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by wprzecho on 21.01.16.
@@ -45,7 +46,11 @@ public class AnalyzerImpl implements Analyzer {
         final Map<String, Integer> tempResult = new HashMap<>();
         final String[] words = text.split("\\s+|,\\s*|\\.\\s*");
         final PorterStemmer stemmer = new PorterStemmer();
+        Set<String> stopWords = training.getStopWords();
         for (final String word : words) {
+            if(stopWords.contains(word))
+                continue;
+
             final String stemmedWord = stemmer.stem(word);
             Integer amount = tempResult.get(stemmedWord);
             if (amount == null)
