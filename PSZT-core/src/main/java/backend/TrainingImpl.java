@@ -238,6 +238,11 @@ public class TrainingImpl implements Training {
     }
 
     @Override
+    public boolean isWordKnown(String word) {
+        return trainedWords.contains(word);
+    }
+
+    @Override
     public void setCategories(final Map<String, Integer> categories) {
         this.categories = categories;
     }

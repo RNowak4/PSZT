@@ -28,4 +28,6 @@ public interface Training {
      * @return all known words
      */
     Set<String> getTrainedWords();
+
+    boolean isWordKnown(final String word);
 }
