@@ -11,6 +11,7 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     compile 'org.encog:encog-core:3.3.0'
+    compile 'org.apache.opennlp:opennlp-tools:1.6.0'
     compile project(':PSZT-api')
     compile project(':PSZT-core')
 }
