@@ -97,6 +97,10 @@ public class Main extends Application {
             primaryStage.close();
         });
 
+        directory1TF.setEditable(false);
+        directory2TF.setEditable(false);
+        directory2Button.setDisable(true);
+
         directory1Button.setOnAction(event1 ->{
             FileChooser chooser = new FileChooser();
             File chosenFile =  chooser.showOpenDialog(rootLayout.getScene().getWindow());
@@ -112,6 +116,7 @@ public class Main extends Application {
                 alert.show();
             } else{
                 textLearner.loadCategoriesFromFile(directory1TF.getText());
+                directory2Button.setDisable(false);
             }
         });
 
@@ -154,10 +159,14 @@ public class Main extends Application {
 
             final Integer pos = new Integer(position);
 
+            if(data.getData().length != textLearner.getCategories().size()){
+                System.out.println("ERROR!!!!");
+            }
+
 
             String result = textLearner.getCategories().entrySet()
                     .stream()
-                    .filter(entry -> entry.getValue() == pos)
+                    .filter(entry -> entry.getValue().equals(pos))
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList()).get(0);
             resultTextField.setText(result);
