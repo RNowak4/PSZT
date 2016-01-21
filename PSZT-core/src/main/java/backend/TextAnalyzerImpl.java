@@ -1,6 +1,6 @@
 package backend;
 
-import org.encog.neural.data.NeuralData;
+import org.encog.ml.data.MLData;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.training.Train;
 
@@ -23,8 +23,7 @@ public class TextAnalyzerImpl implements TextAnalyzer {
         this.network = new BasicNetwork();
         this.training = new TrainingImpl(desiredError, maxEpochs, network, trainingMethodType);
         this.training.setCategories(categories);
-        // TODO analyzer init...
-        // analyzer.setNeuralNetwork(network);
+        this.analyzer = new AnalyzerImpl(training);
     }
 
     @Override
@@ -33,12 +32,12 @@ public class TextAnalyzerImpl implements TextAnalyzer {
     }
 
     @Override
-    public NeuralData analyzeFile(final String fileName) {
+    public MLData analyzeFile(final String fileName) {
         return analyzer.analyzeFile(fileName);
     }
 
     @Override
-    public NeuralData analyzeText(final String text) {
+    public MLData analyzeText(final String text) {
         return analyzer.analyzeText(text);
     }
 
@@ -101,6 +100,11 @@ public class TextAnalyzerImpl implements TextAnalyzer {
     @Override
     public Set<String> getTrainedWords() {
         return training.getTrainedWords();
+    }
+
+    @Override
+    public boolean isWordKnown(String word) {
+        return training.getTrainedWords().contains(word);
     }
 
     private void addCategory(final String categoryName) {

@@ -205,7 +205,7 @@ public class TrainingImpl implements Training {
         int outputSize = this.categories.size();
 
         network.addLayer(new BasicLayer(new ActivationSigmoid(), true, inputSize));
-        network.addLayer(new BasicLayer(new ActivationLinear(), true, outputSize));
+        network.addLayer(new BasicLayer(new ActivationSigmoid(), true, outputSize));
         network.getStructure().finalizeStructure();
         network.reset();
     }
