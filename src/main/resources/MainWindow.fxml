@@ -22,7 +22,7 @@
    <center>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <SplitPane dividerPositions="0.4" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <SplitPane dividerPositions="0.45" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                            <children>
@@ -33,14 +33,29 @@
                                           <Font size="16.0" />
                                        </font>
                                     </Label>
-                                    <Label text="Choose directory with XML files." />
+                              <Label text="Choose file with categories:" />
+                              <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                                 <children>
+                                    <TextField fx:id="directory1TF" HBox.hgrow="ALWAYS" />
+                                    <Button fx:id="directory1Button" mnemonicParsing="false" text="  ...  " />
+                                 </children>
+                              </HBox>
+                              <Button fx:id="process1Button" mnemonicParsing="false" prefHeight="25.0" prefWidth="220.0" text="Process">
+                                 <VBox.margin>
+                                    <Insets left="80.0" right="80.0" />
+                                 </VBox.margin>
+                              </Button>
+                                    <Label text="Choose file with learning data:">
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin></Label>
                                     <HBox spacing="10.0">
                                        <children>
-                                          <TextField fx:id="directoryTF" HBox.hgrow="ALWAYS" />
-                                          <Button fx:id="directoryButton" mnemonicParsing="false" text="  ...  " />
+                                          <TextField fx:id="directory2TF" HBox.hgrow="ALWAYS" />
+                                          <Button fx:id="directory2Button" mnemonicParsing="false" text="  ...  " />
                                        </children>
                                     </HBox>
-                                    <Button fx:id="processButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="220.0" text="Process">
+                                    <Button fx:id="process2Button" mnemonicParsing="false" prefHeight="25.0" prefWidth="220.0" text="Process">
                                        <VBox.margin>
                                           <Insets left="80.0" right="80.0" />
                                        </VBox.margin>
