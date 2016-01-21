@@ -10,9 +10,9 @@ public interface Training {
     /**
      * @return true, if OK
      */
-    boolean trainStemmedDirectory(final String directoryName);
+    boolean trainDirectory(final String directoryName);
 
-    boolean trainStemmedFile(final String fileName);
+    boolean trainFile(final String fileName);
 
     void setCategories(Map<String, Integer> categories);
 

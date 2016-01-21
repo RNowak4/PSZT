@@ -1,6 +1,7 @@
 package backend;
 
-import org.encog.engine.network.activation.ActivationLinear;
+import opennlp.tools.stemmer.PorterStemmer;
+import opennlp.tools.stemmer.Stemmer;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.neural.data.NeuralDataSet;
 import org.encog.neural.data.basic.BasicNeuralDataSet;
@@ -15,32 +16,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-
-class DataSet {
-    private int category;
-    private Map<String, Integer> wordsMap;
-
-    public DataSet(final int category) {
-        this.category = category;
-        this.wordsMap = new HashMap<>();
-    }
-
-    void addWord(final String word) {
-        Integer count = wordsMap.get(word);
-        if (count != null)
-            wordsMap.replace(word, count + 1);
-        else
-            wordsMap.put(word, 1);
-    }
-
-    public int getCategory() {
-        return category;
-    }
-
-    public Map<String, Integer> getWordsMap() {
-        return wordsMap;
-    }
-}
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("ConstantConditions")
 public class TrainingImpl implements Training {
@@ -52,6 +29,7 @@ public class TrainingImpl implements Training {
     private double[][] idealOutputTable;
     private Map<String, Integer> categories = new HashMap<>();
     private Set<String> trainedWords = new TreeSet<>();
+    private Set<String> stopWords = new HashSet<>();
 
     public TrainingImpl(final double desiredError, final int maxEpochs,
                         final BasicNetwork network,
@@ -60,18 +38,39 @@ public class TrainingImpl implements Training {
         this.maxEpochs = maxEpochs;
         this.trainingMethodType = trainingMethodType;
         this.network = network;
+
+        loadStopWords();
+    }
+
+    private void loadStopWords() {
+        ClassLoader cl = this.getClass().getClassLoader();
+        File stopWordsFile = new File(cl.getResource("stopWords.txt").getFile());
+
+        try (BufferedReader br = new BufferedReader(new FileReader(stopWordsFile))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                stopWords.addAll(Stream.of(line.split("\\s+")).collect(Collectors.toSet()));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // returns list containing counter words for each category
     private List<DataSet> learnFromFile(final File file) throws IOException {
         List<DataSet> retList = new ArrayList<>();
         DataSet dataSet = null;
+        Stemmer stemmer = new PorterStemmer();
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 for (final String word : line.split("\\s+")) {
-                    Integer categoryPos = categories.get(word);
+                    if (stopWords.contains(word))
+                        continue;
+
+                    final String stemmedWord = stemmer.stem(word).toString();
+                    final Integer categoryPos = categories.get(stemmedWord);
                     if (categoryPos != null) {
                         if (dataSet != null)
                             retList.add(dataSet);
@@ -145,7 +144,7 @@ public class TrainingImpl implements Training {
     }
 
     @Override
-    public boolean trainStemmedDirectory(final String directoryName) {
+    public boolean trainDirectory(final String directoryName) {
         final File trainingDirectory = new File(directoryName);
 
         if (!trainingDirectory.isDirectory()) {
@@ -159,13 +158,13 @@ public class TrainingImpl implements Training {
         }
 
         prepareNetwork();
-        learnNetwork();
+        teachNetwork();
 
         return true;
     }
 
     @Override
-    public boolean trainStemmedFile(final String fileName) {
+    public boolean trainFile(final String fileName) {
         final File file = new File(fileName);
 
         try {
@@ -175,7 +174,7 @@ public class TrainingImpl implements Training {
         }
 
         prepareNetwork();
-        learnNetwork();
+        teachNetwork();
 
         return true;
     }
@@ -210,7 +209,7 @@ public class TrainingImpl implements Training {
         network.reset();
     }
 
-    private void learnNetwork() {
+    private void teachNetwork() {
         final NeuralDataSet trainingSet = new BasicNeuralDataSet(inputTable, idealOutputTable);
         final Train train = getTraining(network, trainingSet);
 
@@ -220,7 +219,6 @@ public class TrainingImpl implements Training {
             System.out.println("Epoch #" + epoch + " Error:" + train.getError());
             ++epoch;
         } while (epoch < maxEpochs && train.getError() > desiredError);
-
     }
 
     private Train getTraining(final BasicNetwork network, final NeuralDataSet trainingSet) {

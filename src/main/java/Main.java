@@ -134,7 +134,7 @@ public class Main extends Application {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Type valid file path!");
                 alert.show();
             } else {
-                boolean result = textLearner.trainStemmedFile(directory2TF.getText());
+                boolean result = textLearner.trainFile(directory2TF.getText());
                 if(result) {
                     infoLabel.setTextFill(Paint.valueOf(Color.GREEN.toString()));
                     infoLabel.setText("PROCESSING SUCCEED");

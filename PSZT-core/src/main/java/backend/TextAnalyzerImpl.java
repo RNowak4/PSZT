@@ -47,13 +47,13 @@ public class TextAnalyzerImpl implements TextAnalyzer {
     }
 
     @Override
-    public boolean trainStemmedDirectory(final String directoryName) {
-        return training.trainStemmedDirectory(directoryName);
+    public boolean trainDirectory(final String directoryName) {
+        return training.trainDirectory(directoryName);
     }
 
     @Override
-    public boolean trainStemmedFile(final String fileName) {
-        return training.trainStemmedFile(fileName);
+    public boolean trainFile(final String fileName) {
+        return training.trainFile(fileName);
     }
 
     @Override
