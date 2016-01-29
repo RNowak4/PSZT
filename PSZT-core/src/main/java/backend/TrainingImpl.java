@@ -196,13 +196,13 @@ public class TrainingImpl implements Training {
             // TODO uczenie sieci tutaj
 
             final int[] recallTable = new int[categories.size()];
-            int trueClassificationCounter = 0;
+            final int[] precisionTable = new int[categories.size()];
             for (DataSet dataSet : trainingSet) {
                 final Integer classifiedCategory = classifyDataSet(dataSet);
                 recallTable[classifiedCategory]++;
 
                 if (classifiedCategory == dataSet.getCategory())
-                    trueClassificationCounter++;
+                    precisionTable[classifiedCategory]++;
             }
 
             // dla kazdej kategorii wyswietlamy recall a na koniec wyswietlamy precision(1 kolumna)
@@ -216,8 +216,12 @@ public class TrainingImpl implements Training {
             System.out.println();
 
             // liczenie precyzji
-            final double precision = (double) trueClassificationCounter / allDataSets.size();
-            System.out.println("Precision for iteration " + i + ":" + precision);
+            System.out.println("Precision for iteration " + i + ":");
+            j = 0;
+            for (int count : precisionTable) {
+                final double precision = (double) count / (double) recallTable[j];
+                System.out.println(j++ + precision + "   ");
+            }
             System.out.println();
 
             downSeparator = upSeparator;
