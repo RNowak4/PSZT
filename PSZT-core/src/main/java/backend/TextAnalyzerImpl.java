@@ -60,6 +60,11 @@ public class TextAnalyzerImpl implements TextAnalyzer {
     }
 
     @Override
+    public boolean trainFileWithStatistics(String fileName) {
+        return training.trainFileWithStatistics(fileName);
+    }
+
+    @Override
     public void setCategories(Map<String, Integer> categories) {
         this.categories = categories;
     }

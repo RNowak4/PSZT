@@ -203,12 +203,34 @@ public class TrainingImpl implements Training {
 
         for (int i = 0; i < 10; i++) {
             // bierzemy dane do uczenia
-            final List<DataSet> learningSet = allDataSets.subList(0, downSeparator - 1);
+            final List<DataSet> learningSet = allDataSets.subList(0, downSeparator);
             learningSet.addAll(allDataSets.subList(upSeparator + 1, allSets - 1));
 
-            final List<DataSet> trainingSet = allDataSets.subList(downSeparator, upSeparator);
+            final List<DataSet> trainingSet = allDataSets.subList(downSeparator + 1, upSeparator);
 
-            // TODO uczenie sieci tutaj
+            final double[][] inputTable = new double[learningSet.size()][];
+            final double[][] idealOutputTable = new double[learningSet.size()][];
+
+            int j = 0;
+            final String[] allKnownWords = new String[trainedWords.size()];
+            trainedWords.toArray(allKnownWords);
+            for (DataSet learningData : learningSet) {
+                inputTable[j] = new double[trainedWords.size()];
+                idealOutputTable[j] = new double[trainedWords.size()];
+
+                final Map<String, Integer> wordsMap = learningData.getWordsMap();
+                for (int k = 0; k < allKnownWords.length; ++k) {
+                    if (wordsMap.containsKey(allKnownWords[k])) {
+                        inputTable[j][k] = wordsMap.get(allKnownWords[k]);
+                    } else
+                        inputTable[j][k] = 0;
+                }
+                idealOutputTable[j][learningData.getCategory()] = 1;
+
+                ++j;
+            }
+
+            teachNetwork(inputTable, idealOutputTable);
 
             final int[] recallTable = new int[categories.size()];
             final int[] precisionTable = new int[categories.size()];
@@ -222,11 +244,13 @@ public class TrainingImpl implements Training {
 
             // dla kazdej kategorii wyswietlamy recall a na koniec wyswietlamy precision(1 kolumna)
             System.out.println("Recall for iteration " + i + ":");
-            int j = 0;
+            j = 0;
             for (int count : recallTable) {
                 // liczenie recalla dla kazdej kategorii
-                final double recall = (double) count / allDataSets.size();
-                System.out.print(j++ + recall + "   ");
+                final int y = j;
+                long x = allDataSets.stream().filter(set -> set.getCategory() == y).count();
+                final double recall = (double) count / (double) x;
+                System.out.print(recall + "   ");
             }
             System.out.println();
 
@@ -235,8 +259,10 @@ public class TrainingImpl implements Training {
             j = 0;
             for (int count : precisionTable) {
                 final double precision = (double) count / (double) recallTable[j];
-                System.out.println(j++ + precision + "   ");
+                System.out.print( precision + "   ");
             }
+            System.out.println();
+            System.out.println();
             System.out.println();
 
             downSeparator = upSeparator;
@@ -311,6 +337,17 @@ public class TrainingImpl implements Training {
         do {
             train.iteration();
             System.out.println("Epoch #" + epoch + " Error:" + train.getError());
+            ++epoch;
+        } while (epoch < maxEpochs && train.getError() > desiredError);
+    }
+
+    private void teachNetwork(final double[][] inputTable, final double[][] idealOutputTable) {
+        final NeuralDataSet trainingSet = new BasicNeuralDataSet(inputTable, idealOutputTable);
+        final Train train = getTraining(network, trainingSet);
+
+        int epoch = 0;
+        do {
+            train.iteration();
             ++epoch;
         } while (epoch < maxEpochs && train.getError() > desiredError);
     }

@@ -57,7 +57,9 @@ public class Main extends Application {
     public static void main(String[] args) {
 //        launch(args);
 
-        // TODO reczne uczenie z pliku - bez gui
+        TextAnalyzer analyzer = new TextAnalyzerImpl(DEFAULT_ERROR, DEFAULT_MAX_EPOCHS, DEFAULT_LEARNING);
+        analyzer.loadCategoriesFromFile("test/categories.txt");
+        analyzer.trainFileWithStatistics("test/nauka.txt");
     }
 
     @Override
