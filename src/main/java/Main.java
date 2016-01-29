@@ -55,7 +55,9 @@ public class Main extends Application {
     private MenuItem menuClose;
 
     public static void main(String[] args) {
-        launch(args);
+//        launch(args);
+
+        // TODO reczne uczenie z pliku - bez gui
     }
 
     @Override

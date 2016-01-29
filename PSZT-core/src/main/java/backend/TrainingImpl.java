@@ -172,6 +172,21 @@ public class TrainingImpl implements Training {
 
         prepareNetwork();
         teachNetwork();
+
+        return true;
+    }
+
+    @Override
+    public boolean trainFileWithStatistics(final String fileName) {
+        final File file = new File(fileName);
+
+        try {
+            createLearningData(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        prepareNetwork();
         printStatistics();
 
         return true;

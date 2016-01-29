@@ -14,6 +14,8 @@ public interface Training {
 
     boolean trainFile(final String fileName);
 
+    boolean trainFileWithStatistics(final String fileName);
+
     void setCategories(Map<String, Integer> categories);
 
     BasicNetwork getNetwork();
