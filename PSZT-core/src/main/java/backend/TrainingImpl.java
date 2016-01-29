@@ -244,12 +244,9 @@ public class TrainingImpl implements Training {
 
             // dla kazdej kategorii wyswietlamy recall a na koniec wyswietlamy precision(1 kolumna)
             System.out.println("Recall for iteration " + i + ":");
-            j = 0;
             for (int count : recallTable) {
                 // liczenie recalla dla kazdej kategorii
-                final int y = j;
-                long x = allDataSets.stream().filter(set -> set.getCategory() == y).count();
-                final double recall = (double) count / (double) x;
+                final double recall = (double) count / (double) trainingSet.size();
                 System.out.print(recall + "   ");
             }
             System.out.println();
@@ -258,7 +255,7 @@ public class TrainingImpl implements Training {
             System.out.println("Precision for iteration " + i + ":");
             j = 0;
             for (int count : precisionTable) {
-                final double precision = (double) count / (double) recallTable[j];
+                final double precision = (double) count / (double) trainingSet.size();
                 System.out.print( precision + "   ");
             }
             System.out.println();

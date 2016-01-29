@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Main extends Application {
-    private static final double DEFAULT_ERROR = 0.01;
+    private static final double DEFAULT_ERROR = 0.001;
     private static final int DEFAULT_MAX_EPOCHS = 50;
     private static final Class DEFAULT_LEARNING = ResilientPropagation.class;
     private TextAnalyzer textLearner = new TextAnalyzerImpl(DEFAULT_ERROR, DEFAULT_MAX_EPOCHS, DEFAULT_LEARNING);
