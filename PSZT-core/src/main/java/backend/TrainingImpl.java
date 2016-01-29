@@ -3,6 +3,8 @@ package backend;
 import opennlp.tools.stemmer.PorterStemmer;
 import opennlp.tools.stemmer.Stemmer;
 import org.encog.engine.network.activation.ActivationSigmoid;
+import org.encog.ml.data.MLData;
+import org.encog.ml.data.basic.BasicMLData;
 import org.encog.neural.data.NeuralDataSet;
 import org.encog.neural.data.basic.BasicNeuralDataSet;
 import org.encog.neural.networks.BasicNetwork;
@@ -16,8 +18,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SuppressWarnings("ConstantConditions")
 public class TrainingImpl implements Training {
@@ -29,43 +29,31 @@ public class TrainingImpl implements Training {
     private double[][] idealOutputTable;
     private Map<String, Integer> categories = new HashMap<>();
     private Set<String> trainedWords = new TreeSet<>();
-    private Set<String> stopWords = new HashSet<>();
+    private Set<String> stopWords;
+    private List<DataSet> allDataSets = new ArrayList<>();
 
     public TrainingImpl(final double desiredError, final int maxEpochs,
                         final BasicNetwork network,
+                        final Set<String> stopWords,
                         final Class<? extends Train> trainingMethodType) {
         this.desiredError = desiredError;
         this.maxEpochs = maxEpochs;
         this.trainingMethodType = trainingMethodType;
         this.network = network;
-
-        loadStopWords();
-    }
-
-    private void loadStopWords() {
-        ClassLoader cl = this.getClass().getClassLoader();
-        File stopWordsFile = new File(cl.getResource("stopWords.txt").getFile());
-
-        try (BufferedReader br = new BufferedReader(new FileReader(stopWordsFile))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                stopWords.addAll(Stream.of(line.split("\\s+")).collect(Collectors.toSet()));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.stopWords = stopWords;
     }
 
     // returns list containing counter words for each category
     private List<DataSet> learnFromFile(final File file) throws IOException {
-        List<DataSet> retList = new ArrayList<>();
+        final List<DataSet> retList = new ArrayList<>();
+        final Stemmer stemmer = new PorterStemmer();
         DataSet dataSet = null;
-        Stemmer stemmer = new PorterStemmer();
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                for (final String word : line.split("\\s+")) {
+                final String[] wordsInLine = line.split("\\s+");
+                for (final String word : wordsInLine) {
                     if (stopWords.contains(word))
                         continue;
 
@@ -81,7 +69,6 @@ public class TrainingImpl implements Training {
                 }
             }
         }
-
         retList.add(dataSet);
 
         return retList;
@@ -99,10 +86,15 @@ public class TrainingImpl implements Training {
 
         if (file.isDirectory()) {
             for (final File subFile : file.listFiles()) {
-                learnedData.add(learnFromFile(subFile));
+                final List<DataSet> dataSets = learnFromFile(subFile);
+                learnedData.add(dataSets);
+                allDataSets.addAll(dataSets);
             }
-        } else
-            learnedData.add(learnFromFile(file));
+        } else {
+            final List<DataSet> dataSets = learnFromFile(file);
+            learnedData.add(dataSets);
+            allDataSets.addAll(dataSets);
+        }
 
         flushData(learnedData);
     }
@@ -180,8 +172,86 @@ public class TrainingImpl implements Training {
 
         prepareNetwork();
         teachNetwork();
+        printStatistics();
 
         return true;
+    }
+
+    /**
+     * Funkcja powinna tworzyc tabelke z Recall i Precision.
+     * Interesuje nas tylko przeczytanie danych wiec niech wywali wyniki na System.out
+     */
+    private void printStatistics() {
+        final int allSets = allDataSets.size();
+        int downSeparator, upSeparator;
+        downSeparator = 0;
+        upSeparator = allDataSets.size() / 10;
+        for (int i = 0; i < 10; i++) {
+            // bierzemy dane do uczenia
+            final List<DataSet> learningSet = allDataSets.subList(0, downSeparator - 1);
+            learningSet.addAll(allDataSets.subList(upSeparator + 1, allSets - 1));
+
+            final List<DataSet> trainingSet = allDataSets.subList(downSeparator, upSeparator);
+
+            // TODO uczenie sieci tutaj
+
+            downSeparator = upSeparator;
+            upSeparator += allSets / 10;
+
+            final int[] recallTable = new int[categories.size()];
+            int trueClassificationCounter = 0;
+            for (DataSet dataSet : trainingSet) {
+                Integer classifiedCategory = classifyDataSet(dataSet);
+                recallTable[classifiedCategory]++;
+
+                if (classifiedCategory == dataSet.getCategory())
+                    trueClassificationCounter++;
+            }
+
+            // dla kazdej kategorii wyswietlamy recall a na koniec wyswietlamy precision(1 kolumna)
+            System.out.println("Recall for iteration " + i + ":");
+            int j = 0;
+            for (int count : recallTable) {
+                // liczenie recalla dla kazdej kategorii
+                double recall = (double) count / allDataSets.size();
+                System.out.print(j++ + recall + "   ");
+            }
+            System.out.println();
+
+            // liczenie precyzji
+            double precision = (double) trueClassificationCounter / allDataSets.size();
+            System.out.println("Precision for iteration " + i + ":" + precision);
+
+        }
+    }
+
+    private Integer classifyDataSet(final DataSet dataSet) {
+        final Map<String, Integer> wordsMap = dataSet.getWordsMap();
+        final String[] allKnownWords = new String[trainedWords.size()];
+        final double[] wordsTable = new double[trainedWords.size()];
+        trainedWords.toArray(allKnownWords);
+
+        for (int i = 0; i < allKnownWords.length; ++i) {
+            if (wordsMap.containsKey(allKnownWords[i])) {
+                wordsTable[i] = wordsMap.get(allKnownWords[i]);
+            } else
+                wordsTable[i] = 0;
+        }
+
+        MLData computed = network.compute(new BasicMLData(wordsTable));
+
+        double max = 0.0;
+        int classifiedCategory = 0;
+        int counter = 0;
+        for (double v : computed.getData()) {
+            if (v > max) {
+                max = v;
+                classifiedCategory = counter;
+            }
+            ++counter;
+        }
+
+        return classifiedCategory;
     }
 
     @Override

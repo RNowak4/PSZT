@@ -4,24 +4,27 @@ import org.encog.ml.data.MLData;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.training.Train;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TextAnalyzerImpl implements TextAnalyzer {
     private Analyzer analyzer;
     private BasicNetwork network;
     private Training training;
     private Map<String, Integer> categories;
+    private Set<String> stopWords = new HashSet<>();
 
     public TextAnalyzerImpl(double desiredError, int maxEpochs,
                             final Class<? extends Train> trainingMethodType) {
         this.categories = new HashMap<>();
         this.network = new BasicNetwork();
-        this.training = new TrainingImpl(desiredError, maxEpochs, network, trainingMethodType);
+        loadStopWords();
+        this.training = new TrainingImpl(desiredError, maxEpochs, network, stopWords, trainingMethodType);
         this.training.setCategories(categories);
         this.analyzer = new AnalyzerImpl(training);
     }
@@ -72,6 +75,20 @@ public class TextAnalyzerImpl implements TextAnalyzer {
                 addCategory(category);
             }
             scanner.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadStopWords() {
+        ClassLoader cl = this.getClass().getClassLoader();
+        File stopWordsFile = new File(cl.getResource("stopWords.txt").getFile());
+
+        try (BufferedReader br = new BufferedReader(new FileReader(stopWordsFile))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                stopWords.addAll(Stream.of(line.split("\\s+")).collect(Collectors.toSet()));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

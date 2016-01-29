@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Main extends Application {
-    private static final double DEFAULT_ERROR = 0.001;
-    private static final int DEFAULT_MAX_EPOCHS=50;
+    private static final double DEFAULT_ERROR = 0.01;
+    private static final int DEFAULT_MAX_EPOCHS = 50;
     private static final Class DEFAULT_LEARNING = ResilientPropagation.class;
     private TextAnalyzer textLearner = new TextAnalyzerImpl(DEFAULT_ERROR, DEFAULT_MAX_EPOCHS, DEFAULT_LEARNING);
     private Stage primaryStage;
@@ -91,12 +91,12 @@ public class Main extends Application {
         process2Button.disableProperty().bind(directory2TF.textProperty().isEmpty());
         menuReset.disableProperty().bind(readyToWork.not());
 
-        menuReset.setOnAction( event -> {
+        menuReset.setOnAction(event -> {
 
             readyToWork.setValue(false);
         });
 
-        menuClose.setOnAction( event -> {
+        menuClose.setOnAction(event -> {
             primaryStage.close();
         });
 
@@ -104,20 +104,20 @@ public class Main extends Application {
         directory2TF.setEditable(false);
         directory2Button.setDisable(true);
 
-        directory1Button.setOnAction(event1 ->{
+        directory1Button.setOnAction(event1 -> {
             FileChooser chooser = new FileChooser();
-            File chosenFile =  chooser.showOpenDialog(rootLayout.getScene().getWindow());
-            if(chosenFile != null){
+            File chosenFile = chooser.showOpenDialog(rootLayout.getScene().getWindow());
+            if (chosenFile != null) {
                 directory1TF.setText(chosenFile.getAbsolutePath());
             }
         });
 
         process1Button.setOnAction(event1 -> {
             File file = new File(directory1TF.getText());
-            if(!file.exists()){
+            if (!file.exists()) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Type valid file path!");
                 alert.show();
-            } else{
+            } else {
                 textLearner.loadCategoriesFromFile(directory1TF.getText());
                 directory2Button.setDisable(false);
             }
@@ -138,7 +138,7 @@ public class Main extends Application {
                 alert.show();
             } else {
                 boolean result = textLearner.trainFile(directory2TF.getText());
-                if(result) {
+                if (result) {
                     infoLabel.setTextFill(Paint.valueOf(Color.GREEN.toString()));
                     infoLabel.setText("PROCESSING SUCCEED");
                     readyToWork.setValue(true);
@@ -154,15 +154,15 @@ public class Main extends Application {
 
             MLData data = textLearner.analyzeText(message);
             int position = 0;
-            for(int i = 0; i < data.getData().length; i++){
-                if(data.getData()[i] > data.getData()[position]){
+            for (int i = 0; i < data.getData().length; i++) {
+                if (data.getData()[i] > data.getData()[position]) {
                     position = i;
                 }
             }
 
             final Integer pos = new Integer(position);
 
-            if(data.getData().length != textLearner.getCategories().size()){
+            if (data.getData().length != textLearner.getCategories().size()) {
                 System.out.println("ERROR!!!!");
             }
 
