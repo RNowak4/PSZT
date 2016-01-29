@@ -183,9 +183,9 @@ public class TrainingImpl implements Training {
      */
     private void printStatistics() {
         final int allSets = allDataSets.size();
-        int downSeparator, upSeparator;
-        downSeparator = 0;
-        upSeparator = allDataSets.size() / 10;
+        int downSeparator = 0;
+        int upSeparator = allSets / 10;
+
         for (int i = 0; i < 10; i++) {
             // bierzemy dane do uczenia
             final List<DataSet> learningSet = allDataSets.subList(0, downSeparator - 1);
@@ -195,13 +195,10 @@ public class TrainingImpl implements Training {
 
             // TODO uczenie sieci tutaj
 
-            downSeparator = upSeparator;
-            upSeparator += allSets / 10;
-
             final int[] recallTable = new int[categories.size()];
             int trueClassificationCounter = 0;
             for (DataSet dataSet : trainingSet) {
-                Integer classifiedCategory = classifyDataSet(dataSet);
+                final Integer classifiedCategory = classifyDataSet(dataSet);
                 recallTable[classifiedCategory]++;
 
                 if (classifiedCategory == dataSet.getCategory())
@@ -213,15 +210,18 @@ public class TrainingImpl implements Training {
             int j = 0;
             for (int count : recallTable) {
                 // liczenie recalla dla kazdej kategorii
-                double recall = (double) count / allDataSets.size();
+                final double recall = (double) count / allDataSets.size();
                 System.out.print(j++ + recall + "   ");
             }
             System.out.println();
 
             // liczenie precyzji
-            double precision = (double) trueClassificationCounter / allDataSets.size();
+            final double precision = (double) trueClassificationCounter / allDataSets.size();
             System.out.println("Precision for iteration " + i + ":" + precision);
+            System.out.println();
 
+            downSeparator = upSeparator;
+            upSeparator += allSets / 10;
         }
     }
 
